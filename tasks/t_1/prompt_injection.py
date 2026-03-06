@@ -1,4 +1,4 @@
-from langchain_core.messages import BaseMessage, SystemMessage, HumanMessage
+from langchain_core.messages import BaseMessage, SystemMessage, HumanMessage, AIMessage
 from langchain_openai import AzureChatOpenAI
 from pydantic import SecretStr
 
@@ -25,14 +25,39 @@ PROFILE = """
 """
 
 def main():
-    #TODO 1:
-    # 1. Create AzureChatOpenAI client, model to use `gpt-4.1-nano-2025-04-14` (or any other mini or nano models)
-    # 2. Create messages array with system prompt as 1st message and user message with PROFILE info (we emulate the
-    #    flow when we retrieved PII from some DB and put it as user message).
-    # 3. Create console chat with LLM, preserve history (user and assistant messages should be added to messages array
-    #   and each new request you must provide whole conversation history. With preserved history we can make multistep
-    #   (more complicated strategy) of prompt injection).
-    raise NotImplementedError
+    llm_client = AzureChatOpenAI(
+        azure_deployment = "gpt-4.1-nano-2025-04-14",
+        azure_endpoint = DIAL_URL,
+        api_key = SecretStr(API_KEY),
+        api_version = "",
+        temperature = 0.0
+    )
+
+    messages = [
+        SystemMessage(content = SYSTEM_PROMPT),
+        HumanMessage(content = PROFILE)
+    ]
+
+    print("🔒 Secure Colleague Directory Assistant")
+    print("Type 'exit' to quit\n")
+
+    while True:
+        user_input = input("> ").strip()
+
+        if user_input.lower() == 'exit' or user_input.lower() == 'quit':
+            break
+
+        # Add user message to history
+        messages.append(HumanMessage(content = user_input))
+
+        # Call LLM with full history - like passing entire conversation context
+        response = llm_client.invoke(messages)
+
+        # Add assistant response to history for next turn
+        # This is what enables multi-step prompt injection attempts
+        messages.append(AIMessage(content = response.content))
+
+        print(f"\nAI: {response.content}\n")
 
 
 main()

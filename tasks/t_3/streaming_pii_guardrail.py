@@ -195,6 +195,14 @@ PROFILE = """
 #TODO:
 # Create AzureChatOpenAI client, model to use `gpt-4.1-nano-2025-04-14` (or any other mini or nano models)
 
+llm_client = AzureChatOpenAI(
+    azure_deployemnt = "gpt-4.1-nano-2025-04-14",
+    azure_endpoint = DIAL_URL,
+    api_key = SecretStr(API_KEY),
+    api_version = "",
+    temperature = 0.0
+)
+
 def main():
     #TODO:
     # 1. Create PresidioStreamingPIIGuardrail or StreamingPIIGuardrail
